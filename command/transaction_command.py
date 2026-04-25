@@ -11,13 +11,17 @@ if TYPE_CHECKING:
 class Command(ABC):
     """
     Abstract base class for all commands.
-    
+
     DESIGN PATTERN: Command
-    PURPOSE: Encapsulate transactions as objects that can be queued, logged, undone, and redone
-    SOLID PRINCIPLE: Single Responsibility - each command has one responsibility (execute)
-    SOLID PRINCIPLE: Dependency Inversion - depends on Command abstraction
-    SOLID PRINCIPLE: Open/Closed - new commands can be added without modifying Balance
-    
+    PURPOSE: Encapsulate transactions as objects that can be
+    queued, logged, undone, and redone
+    SOLID PRINCIPLE: Single Responsibility - each command has one
+    responsibility (execute)
+    SOLID PRINCIPLE: Dependency Inversion - depends on Command
+    abstraction
+    SOLID PRINCIPLE: Open/Closed - new commands can be added
+    without modifying Balance
+
     By encapsulating operations as command objects, we gain:
     - Ability to undo/redo operations
     - Ability to log operation history
@@ -28,30 +32,34 @@ class Command(ABC):
     @abstractmethod
     def execute(self) -> None:
         """Execute the command."""
-        raise NotImplementedError("Subclasses must implement execute()")
+        raise NotImplementedError(
+            "Subclasses must implement execute()")
 
     @abstractmethod
     def undo(self) -> None:
         """Undo the command (restore previous state)."""
-        raise NotImplementedError("Subclasses must implement undo()")
+        raise NotImplementedError(
+            "Subclasses must implement undo()")
 
     @abstractmethod
     def get_description(self) -> str:
         """Get a description of the command."""
-        raise NotImplementedError("Subclasses must implement get_description()")
+        raise NotImplementedError(
+            "Subclasses must implement get_description()")
 
 
 class ApplyTransactionCommand(Command):
     """
     Command to apply a transaction to the balance.
-    
-    Supports undo by storing the previous balance before the transaction.
+
+    Supports undo by storing the previous balance before the
+    transaction.
     """
 
     def __init__(self, balance: "Balance", transaction: "Transaction") -> None:
         """
         Initialize the command.
-        
+
         Args:
             balance: The Balance instance to apply the transaction to
             transaction: The Transaction to apply
@@ -63,20 +71,20 @@ class ApplyTransactionCommand(Command):
     def execute(self) -> None:
         """
         Execute the command: apply the transaction to the balance.
-        
+
         Stores the current balance before applying the transaction,
         allowing the operation to be undone later.
         """
         # Save current balance before applying transaction
         self.previous_balance = self.balance.get_balance()
-        
+
         # Apply the transaction
         self.balance.apply_transaction(self.transaction)
 
     def undo(self) -> None:
         """
         Undo the command: restore the balance to its previous state.
-        
+
         By design, we reset the balance to the value it had before
         the command was executed.
         """

@@ -7,16 +7,20 @@ from transaction.transaction_category import TransactionCategory
 class Balance:
     """
     Singleton class to manage the balance.
-    
+
     DESIGN PATTERN: Singleton
-    PURPOSE: Ensures only one instance of Balance exists across the application.
-    SOLID PRINCIPLE: Single Responsibility - manages state only; observers handle notifications
-    SOLID PRINCIPLE: Dependency Inversion - depends on BalanceObserver abstraction, not concrete implementations
-    
+    PURPOSE: Ensures only one instance of Balance exists across the
+    application.
+    SOLID PRINCIPLE: Single Responsibility - manages state only;
+    observers handle notifications
+    SOLID PRINCIPLE: Dependency Inversion - depends on
+    BalanceObserver abstraction, not concrete implementations
+
     Guarantees:
     - Exactly one instance throughout the application lifecycle
     - All code shares the same balance state
-    - Thread-safe instance retrieval (Python GIL ensures thread safety for simple operations)
+    - Thread-safe instance retrieval (Python GIL ensures thread
+      safety for simple operations)
     """
 
     _instance: "Balance | None" = None
@@ -24,7 +28,7 @@ class Balance:
     def __new__(cls) -> "Balance":
         """
         Override __new__ to implement Singleton pattern.
-        
+
         Returns:
             Balance: The single instance of Balance
         """
@@ -35,7 +39,8 @@ class Balance:
 
     def __init__(self) -> None:
         """Initialize the balance (called only once via __new__)."""
-        # Prevent re-initialization on subsequent get_instance() calls
+        # Prevent re-initialization on subsequent get_instance()
+        # calls
         if self._initialized:
             return
         self._balance: float = 0.0
@@ -46,7 +51,7 @@ class Balance:
     def get_instance(cls) -> "Balance":
         """
         Get the singleton instance of Balance.
-        
+
         Returns:
             Balance: The single instance
         """
@@ -61,7 +66,7 @@ class Balance:
     def add_income(self, amount: float) -> None:
         """
         Add income to the balance.
-        
+
         Args:
             amount: The amount to add (must be positive)
         """
@@ -72,9 +77,10 @@ class Balance:
     def add_expense(self, amount: float) -> None:
         """
         Subtract expense from the balance.
-        
+
         Args:
-            amount: The amount to subtract (must be positive; will be subtracted)
+            amount: The amount to subtract (must be positive; will
+                be subtracted)
         """
         if amount < 0:
             raise ValueError("Expense amount must be positive")
@@ -87,13 +93,15 @@ class Balance:
 
         Args:
             transaction: The transaction to apply
-            
+
         Raises:
             ValueError: If transaction category is invalid
         """
         # Validate transaction category
         if transaction.category not in TransactionCategory:
-            raise ValueError(f"Invalid transaction category: {transaction.category}")
+            msg = (f"Invalid transaction category: "
+                   f"{transaction.category}")
+            raise ValueError(msg)
 
         # Apply the transaction
         if transaction.category == TransactionCategory.INCOME:
@@ -107,7 +115,7 @@ class Balance:
     def get_balance(self) -> float:
         """
         Get the current net balance.
-        
+
         Returns:
             float: The current balance
         """
@@ -116,7 +124,7 @@ class Balance:
     def summary(self) -> str:
         """
         Return a summary string of the net balance.
-        
+
         Returns:
             str: A formatted summary of the balance
         """
@@ -125,10 +133,10 @@ class Balance:
     def register_observer(self, observer: "IBalanceObserver") -> None:
         """
         Register an observer to be notified of balance updates.
-        
+
         DESIGN PATTERN: Observer
         PURPOSE: Decouples balance updates from alert/notification logic
-        
+
         Args:
             observer: An object implementing the IBalanceObserver interface
         """
@@ -138,7 +146,7 @@ class Balance:
     def unregister_observer(self, observer: "IBalanceObserver") -> None:
         """
         Unregister an observer.
-        
+
         Args:
             observer: The observer to remove
         """
@@ -148,7 +156,7 @@ class Balance:
     def _notify_observers(self, transaction: "Transaction") -> None:
         """
         Notify all registered observers of a transaction.
-        
+
         Args:
             transaction: The transaction that was applied
         """
@@ -159,4 +167,3 @@ class Balance:
 # Type hints require forward references
 from transaction.transaction import Transaction  # noqa: E402, F401
 from balance.balance_observer import IBalanceObserver  # noqa: E402, F401
-    
