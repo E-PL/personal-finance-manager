@@ -37,81 +37,62 @@ from command.transaction_command import ApplyTransactionCommand
 from command.command_history import CommandHistory
 
 
-def main() -> None:
+def setup_observers(balance: Balance) -> None:
     """
-    Main application entry point.
+    Register observers to the balance instance.
 
-    Demonstrates:
-    - Singleton Pattern: Getting the single Balance instance
-    - Observer Pattern: Registering observers to receive
-      notifications
-    - Adapter Pattern: Converting external freelance income to
-      internal format
-    - Command Pattern: Executing, undoing, and redoing transactions
-    - Transaction Processing: Applying various transactions to track
-      balance changes
+    Observer Pattern: Attach observers that react to balance changes.
     """
-    print("=" * 70)
-    print("Personal Finance Manager - Design Patterns Demonstration")
-    print("=" * 70)
-    print()
-
-    # SINGLETON PATTERN: Get the single instance of Balance
-    # Balance.get_instance() always returns the same object
-    balance = Balance.get_instance()
-    balance.reset()
-    print("✓ Singleton Pattern: Balance instance created (only one)")
-    print()
-
-    # OBSERVER PATTERN: Register observers to be notified
     print("Setting up observers...")
 
-    # Observer 1: Print balance after each transaction
     print_observer = PrintObserver()
     balance.register_observer(print_observer)
-    print("  ✓ PrintObserver registered - will print balance after")
-    print("    each transaction")
+    print("  ✓ PrintObserver registered - will print balance after each "
+          "transaction")
 
-    # Observer 2: Alert when balance falls below threshold
     low_balance_alert = LowBalanceAlertObserver(threshold=100)
     balance.register_observer(low_balance_alert)
-    print("  ✓ LowBalanceAlertObserver registered - will alert when")
-    print("    balance < $100")
+    print("  ✓ LowBalanceAlertObserver registered - will alert when "
+          "balance < $100")
     print()
 
-    # COMMAND PATTERN: Create command history for undo/redo
-    print("Initializing command history for undo/redo capability...")
-    history = CommandHistory()
-    print("  ✓ CommandHistory initialized")
-    print()
 
-    print("Processing transactions...")
-    print("-" * 70)
+def process_standard_transactions(balance: Balance,
+                                  history: CommandHistory) -> None:
+    """
+    Process standard income and expense transactions.
 
-    # Standard income transactions using Command Pattern
-    transactions = [
-        Transaction(500, TransactionCategory.INCOME),  # Income
-        Transaction(150, TransactionCategory.EXPENSE),  # Expense
-        Transaction(200, TransactionCategory.INCOME),  # Income
-    ]
-
+    Command Pattern: Execute transactions through command history to
+    enable undo/redo.
+    """
     msg = ("\n1. Processing standard transactions with Command "
            "Pattern (undo/redo capable):")
     print(msg)
+
+    transactions = [
+        Transaction(500, TransactionCategory.INCOME),
+        Transaction(150, TransactionCategory.EXPENSE),
+        Transaction(200, TransactionCategory.INCOME),
+    ]
+
     for i, transaction in enumerate(transactions, 1):
         print(f"\n   Transaction {i}: {transaction}")
-        # Create command instead of applying directly
         command = ApplyTransactionCommand(balance, transaction)
-        # Execute through history (enables undo/redo)
         history.execute(command)
 
-    print("\n" + "-" * 70)
 
-    # ADAPTER PATTERN: Convert external freelance income to
-    # internal Transaction
+def process_external_transaction(balance: Balance,
+                                 history: CommandHistory) -> None:
+    """
+    Process external freelance income using adapter pattern.
+
+    Adapter Pattern: Convert external format (ExternalFreelanceIncome)
+    to internal format (Transaction).
+    """
     msg = ("\n2. Processing external freelance income (using "
            "Adapter Pattern):")
     print(msg)
+
     freelance_income = ExternalFreelanceIncome(
         amount=1200,
         invoice_id="INV-98765",
@@ -127,13 +108,19 @@ def main() -> None:
     command = ApplyTransactionCommand(balance, adapted_transaction)
     history.execute(command)
 
-    print("\n" + "-" * 70)
-    print(f"\nCurrent {balance.summary()}")
 
-    # Demonstrate UNDO/REDO capability (Command Pattern)
+def demonstrate_undo_redo(balance: Balance,
+                          history: CommandHistory) -> None:
+    """
+    Demonstrate undo/redo capabilities.
+
+    Command Pattern: Show how transactions can be undone and redone
+    using the command history.
+    """
     msg = ("\n3. Demonstrating Undo/Redo Capability "
            "(Command Pattern):")
     print(msg)
+
     print(f"\n   Command History Summary:")
     summary = history.get_history_summary()
     print("   " + summary.replace("\n", "\n   "))
@@ -150,25 +137,71 @@ def main() -> None:
     if history.redo():
         print(f"   ✓ Redo successful! {balance.summary()}")
 
-    print("\n" + "-" * 70)
-    print(f"\nFinal {balance.summary()}")
-    print()
+
+def print_application_summary() -> None:
+    """Print summary of design patterns used in the application."""
     print("=" * 70)
     print("Application completed successfully!")
     print("=" * 70)
     print()
     print("PATTERN SUMMARY:")
-    print("  • Singleton: Balance.get_instance() always returns the")
-    print("    same object")
+    print("  • Singleton: Balance.get_instance() always returns the "
+          "same object")
     msg = ("  • Observer: PrintObserver and LowBalanceAlertObserver "
            "updated automatically")
     print(msg)
-    print("  • Adapter: ExternalFreelanceIncome converted to")
-    print("    Transaction format")
+    print("  • Adapter: ExternalFreelanceIncome converted to "
+          "Transaction format")
     msg = ("  • Command: ApplyTransactionCommand enables undo/redo of "
            "transactions")
     print(msg)
     print()
+
+
+def main() -> None:
+    """
+    Main application entry point.
+
+    Orchestrates the demonstration of design patterns:
+    - Singleton Pattern: Single Balance instance
+    - Observer Pattern: Automatic notifications on balance changes
+    - Adapter Pattern: External-to-internal format conversion
+    - Command Pattern: Transaction execution with undo/redo
+    """
+    print("=" * 70)
+    print("Personal Finance Manager - Design Patterns Demonstration")
+    print("=" * 70)
+    print()
+
+    balance = Balance.get_instance()
+    balance.reset()
+    print("✓ Singleton Pattern: Balance instance created (only one)")
+    print()
+
+    setup_observers(balance)
+
+    print("Initializing command history for undo/redo capability...")
+    history = CommandHistory()
+    print("  ✓ CommandHistory initialized")
+    print()
+
+    print("Processing transactions...")
+    print("-" * 70)
+
+    process_standard_transactions(balance, history)
+    print("\n" + "-" * 70)
+
+    process_external_transaction(balance, history)
+    print("\n" + "-" * 70)
+    print(f"\nCurrent {balance.summary()}")
+
+    demonstrate_undo_redo(balance, history)
+
+    print("\n" + "-" * 70)
+    print(f"\nFinal {balance.summary()}")
+    print()
+
+    print_application_summary()
 
 
 if __name__ == "__main__":
